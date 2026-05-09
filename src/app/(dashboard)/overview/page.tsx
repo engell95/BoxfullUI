@@ -182,8 +182,22 @@ export default function CreateOrderPage() {
             {/* Formulario de Entrada de Producto */}
             <div style={{ background: '#f9fafb', padding: 24, borderRadius: 12, marginBottom: 24 }}>
               <Row gutter={16} align="bottom">
+                <Col span={2}>
+                  <div style={{ 
+                    background: '#fff', 
+                    width: 50, 
+                    height: 50, 
+                    borderRadius: 8, 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    border: '1px solid #e5e7eb'
+                  }}>
+                    <BoxPlotOutlined style={{ fontSize: 24, color: '#9ca3af' }} />
+                  </div>
+                </Col>
                 <Col span={6}>
-                  <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 8 }}>Dimensiones (Largo x Alto x Ancho)</Text>
+                  <Text type="secondary" style={{ fontSize: 11, display: 'block', marginBottom: 8, textTransform: 'uppercase', fontWeight: 600 }}>Dimensiones (Largo x Alto x Ancho)</Text>
                   <Space>
                     <Input value={currentProduct.largo} onChange={e => setCurrentProduct({...currentProduct, largo: e.target.value})} suffix="cm" style={{ width: 70 }} />
                     <Input value={currentProduct.alto} onChange={e => setCurrentProduct({...currentProduct, alto: e.target.value})} suffix="cm" style={{ width: 70 }} />
@@ -191,22 +205,26 @@ export default function CreateOrderPage() {
                   </Space>
                 </Col>
                 <Col span={4}>
-                  <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 8 }}>Peso en libras</Text>
-                  <Input value={currentProduct.peso} onChange={e => setCurrentProduct({...currentProduct, peso: e.target.value})} />
+                  <Text type="secondary" style={{ fontSize: 11, display: 'block', marginBottom: 8, textTransform: 'uppercase', fontWeight: 600 }}>Peso en libras</Text>
+                  <Input value={currentProduct.peso} onChange={e => setCurrentProduct({...currentProduct, peso: e.target.value})} placeholder="3 libras" />
                 </Col>
-                <Col span={10}>
-                  <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 8 }}>Contenido</Text>
-                  <Input value={currentProduct.contenido} onChange={e => setCurrentProduct({...currentProduct, contenido: e.target.value})} />
+                <Col span={8}>
+                  <Text type="secondary" style={{ fontSize: 11, display: 'block', marginBottom: 8, textTransform: 'uppercase', fontWeight: 600 }}>Contenido</Text>
+                  <Input value={currentProduct.contenido} onChange={e => setCurrentProduct({...currentProduct, contenido: e.target.value})} placeholder="iPhone 14 pro Max" />
                 </Col>
                 <Col span={4}>
                   <Button 
                     block 
+                    type="primary"
+                    ghost
                     icon={<PlusOutlined />} 
                     onClick={() => {
-                      append(currentProduct);
-                      setCurrentProduct({ largo: '', alto: '', ancho: '', peso: '', contenido: '' });
+                      if(currentProduct.contenido && currentProduct.peso) {
+                        append(currentProduct);
+                        setCurrentProduct({ largo: '15', alto: '15', ancho: '15', peso: '', contenido: '' });
+                      }
                     }}
-                    style={{ borderRadius: 8, height: 40 }}
+                    style={{ borderRadius: 8, height: 40, border: '1px solid #e5e7eb', color: '#000' }}
                   >
                     Agregar
                   </Button>
@@ -218,31 +236,60 @@ export default function CreateOrderPage() {
             <div style={{ marginBottom: 40 }}>
               {fields.map((field, index) => (
                 <div key={field.id} style={{ 
-                  border: '1px solid #e5e7eb', 
+                  border: '1px solid #D9F99D', // Borde verde claro como en la imagen
                   borderRadius: 12, 
                   padding: '16px 24px', 
                   marginBottom: 16,
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'space-between',
-                  background: '#fff'
+                  background: '#fff',
+                  justifyContent: 'space-between'
                 }}>
-                  <Space size={40}>
-                    <BoxPlotOutlined style={{ fontSize: 24, color: '#9ca3af' }} />
-                    <div>
-                      <Text type="secondary" style={{ fontSize: 12, display: 'block' }}>Peso en libras</Text>
-                      <Text strong>{field.peso}</Text>
-                    </div>
-                    <div>
-                      <Text type="secondary" style={{ fontSize: 12, display: 'block' }}>Contenido</Text>
-                      <Text strong>{field.contenido}</Text>
-                    </div>
-                    <div>
-                      <Text type="secondary" style={{ fontSize: 12, display: 'block' }}>Dimensiones</Text>
-                      <Text strong>{field.largo}x{field.alto}x{field.ancho} cm</Text>
-                    </div>
-                  </Space>
-                  <Button type="text" danger icon={<DeleteOutlined />} onClick={() => remove(index)} />
+                  <Row align="middle" style={{ width: '100%' }} gutter={16}>
+                    <Col span={4}>
+                      <Text type="secondary" style={{ fontSize: 11, display: 'block', textTransform: 'uppercase', fontWeight: 600 }}>Peso en libras</Text>
+                      <Text strong style={{ fontSize: 14 }}>{field.peso}</Text>
+                    </Col>
+                    
+                    <Col span={8}>
+                      <Text type="secondary" style={{ fontSize: 11, display: 'block', textTransform: 'uppercase', fontWeight: 600 }}>Contenido</Text>
+                      <Text strong style={{ fontSize: 14 }}>{field.contenido}</Text>
+                    </Col>
+
+                    <Col span={2} style={{ textAlign: 'center' }}>
+                      <div style={{ background: '#F3F4F6', padding: 8, borderRadius: 8, display: 'inline-flex' }}>
+                        <BoxPlotOutlined style={{ fontSize: 20, color: '#9ca3af' }} />
+                      </div>
+                    </Col>
+
+                    <Col span={8}>
+                      <Row gutter={12}>
+                        <Col span={8}>
+                          <Text type="secondary" style={{ fontSize: 11, display: 'block', textTransform: 'uppercase', fontWeight: 600 }}>Largo</Text>
+                          <Text strong style={{ fontSize: 14 }}>{field.largo} <Text type="secondary" style={{ fontSize: 11 }}>cm</Text></Text>
+                        </Col>
+                        <Col span={8}>
+                          <Text type="secondary" style={{ fontSize: 11, display: 'block', textTransform: 'uppercase', fontWeight: 600 }}>Alto</Text>
+                          <Text strong style={{ fontSize: 14 }}>{field.alto} <Text type="secondary" style={{ fontSize: 11 }}>cm</Text></Text>
+                        </Col>
+                        <Col span={8}>
+                          <Text type="secondary" style={{ fontSize: 11, display: 'block', textTransform: 'uppercase', fontWeight: 600 }}>Ancho</Text>
+                          <Text strong style={{ fontSize: 14 }}>{field.ancho} <Text type="secondary" style={{ fontSize: 11 }}>cm</Text></Text>
+                        </Col>
+                      </Row>
+                    </Col>
+
+                    <Col span={2} style={{ textAlign: 'right' }}>
+                      <Button 
+                        type="primary" 
+                        danger 
+                        ghost 
+                        icon={<DeleteOutlined />} 
+                        onClick={() => remove(index)} 
+                        style={{ border: 'none', background: '#FEE2E2', borderRadius: 8 }}
+                      />
+                    </Col>
+                  </Row>
                 </div>
               ))}
             </div>

@@ -2,10 +2,14 @@
 
 import React, { useState } from 'react';
 import { Layout, Menu, Typography, Avatar, Space } from 'antd';
-import { PlusCircleOutlined, HistoryOutlined, UserOutlined } from '@ant-design/icons';
+import { PlusCircleOutlined, HistoryOutlined, UserOutlined, LogoutOutlined } from '@ant-design/icons';
 import { usePathname, useRouter } from 'next/navigation';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '@/store';
+import { logout } from '@/store/slices/authSlice';
 import Link from 'next/link';
 import { colors } from '@/styles/theme';
+import GlobalFeedback from '@/components/common/GlobalFeedback';
 
 const { Sider, Content, Header } = Layout;
 const { Text, Title } = Typography;
@@ -13,7 +17,20 @@ const { Text, Title } = Typography;
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const dispatch = useDispatch();
+  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
   const [collapsed, setCollapsed] = useState(false);
+  const [checking, setChecking] = useState(true);
+
+  React.useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/login');
+    } else {
+      setChecking(false);
+    }
+  }, [isAuthenticated, router]);
+
+  if (checking) return null; // O un spinner de carga
 
   const menuItems = [
     {
@@ -26,7 +43,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       icon: <HistoryOutlined />,
       label: 'Historial',
     },
+    {
+      key: 'logout',
+      icon: <LogoutOutlined />,
+      label: 'Cerrar sesión',
+      danger: true,
+    },
   ];
+
+  const handleMenuClick = (key: string) => {
+    if (key === 'logout') {
+      dispatch(logout());
+      router.push('/login');
+    } else {
+      router.push(key);
+    }
+  };
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -55,7 +87,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             style={{ borderRight: 0 }}
             items={menuItems.map(item => ({
               ...item,
-              onClick: () => router.push(item.key),
+              onClick: () => handleMenuClick(item.key),
               className: pathname === item.key ? 'active-menu-item' : ''
             }))}
           />
