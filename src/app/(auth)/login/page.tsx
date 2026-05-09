@@ -11,17 +11,13 @@ import { useRouter } from 'next/navigation';
 import { setCredentials, setLoading, setError } from '@/store/slices/authSlice';
 import api from '@/lib/axios';
 import { colors } from '@/styles/theme';
+import { loginSchema } from '@/validations/auth';
 
 const { Title, Text } = Typography;
 const { Content } = Layout;
 const { useBreakpoint } = Grid;
 
-const schema = yup.object().shape({
-  email: yup.string().email('Email inválido').required('El email es requerido'),
-  password: yup.string().required('La contraseña es requerida'),
-});
-
-type FormData = yup.InferType<typeof schema>;
+type FormData = yup.InferType<typeof loginSchema>;
 
 export default function LoginPage() {
   const dispatch = useDispatch();
@@ -33,7 +29,7 @@ export default function LoginPage() {
     handleSubmit,
     formState: { errors },
   } = useForm<FormData>({
-    resolver: yupResolver(schema),
+    resolver: yupResolver(loginSchema),
   });
 
   const onSubmit = async (data: FormData) => {

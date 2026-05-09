@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Form, Input, Button, Row, Col, Typography, Card, DatePicker, Select, Space, Divider } from 'antd';
-import { ArrowRightOutlined, ArrowLeftOutlined, PlusOutlined, DeleteOutlined, BoxPlotOutlined } from '@ant-design/icons';
+import { Form, Input, Button, Row, Col, Typography, Card, DatePicker, Select, Space, Divider, Modal } from 'antd';
+import { ArrowRightOutlined, ArrowLeftOutlined, PlusOutlined, DeleteOutlined, BoxPlotOutlined, CheckCircleFilled } from '@ant-design/icons';
 import { useForm, Controller, useFieldArray } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -11,44 +11,18 @@ import { colors } from '@/styles/theme';
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 const { Option } = Select;
-
-// Schema para el paso 1
-const step1Schema = yup.object().shape({
-  direccionRecoleccion: yup.string().required('Campo requerido'),
-  fechaProgramada: yup.date().required('Campo requerido'),
-  nombres: yup.string().required('Campo requerido'),
-  apellidos: yup.string().required('Campo requerido'),
-  email: yup.string().email('Inválido').required('Campo requerido'),
-  telefono: yup.string().required('Campo requerido'),
-  direccionDestinatario: yup.string().required('Campo requerido'),
-  departamento: yup.string().required('Campo requerido'),
-  municipio: yup.string().required('Campo requerido'),
-  puntoReferencia: yup.string().required('Campo requerido'),
-  indicaciones: yup.string(),
-});
-
-// Schema para el paso 2
-const step2Schema = yup.object().shape({
-  productos: yup.array().of(
-    yup.object().shape({
-      largo: yup.string().required(),
-      alto: yup.string().required(),
-      ancho: yup.string().required(),
-      peso: yup.string().required(),
-      contenido: yup.string().required(),
-    })
-  ).min(1, 'Agrega al menos un producto'),
-});
+import { orderStep1Schema, orderStep2Schema } from '@/validations/order';
 
 export default function CreateOrderPage() {
   const [step, setStep] = useState(1);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   
   const form1 = useForm({
-    resolver: yupResolver(step1Schema),
+    resolver: yupResolver(orderStep1Schema),
   });
 
   const form2 = useForm({
-    resolver: yupResolver(step2Schema),
+    resolver: yupResolver(orderStep2Schema),
     defaultValues: {
       productos: []
     }
@@ -69,6 +43,14 @@ export default function CreateOrderPage() {
 
   const onFinalSubmit = (data: any) => {
     console.log('Orden Completa:', { ...form1.getValues(), ...data });
+    setIsSuccessModalOpen(true);
+  };
+
+  const resetAll = () => {
+    form1.reset();
+    form2.reset();
+    setStep(1);
+    setIsSuccessModalOpen(false);
   };
 
   return (
@@ -305,6 +287,66 @@ export default function CreateOrderPage() {
           </>
         )}
       </Card>
+
+      {/* Modal de Éxito */}
+      <Modal
+        open={isSuccessModalOpen}
+        onCancel={() => setIsSuccessModalOpen(false)}
+        footer={null}
+        centered
+        closable
+        width={400}
+        bodyStyle={{ padding: '40px 24px', textAlign: 'center' }}
+      >
+        <div style={{ 
+          background: '#F0FDF4', 
+          width: 80, 
+          height: 80, 
+          borderRadius: '50%', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          margin: '0 auto 24px'
+        }}>
+          <CheckCircleFilled style={{ fontSize: 40, color: '#166534' }} />
+        </div>
+
+        <Title level={3} style={{ marginBottom: 12 }}>
+          Orden <span style={{ fontWeight: 800 }}>enviada</span>
+        </Title>
+        
+        <Text style={{ fontSize: 16, color: '#4b5563', display: 'block', marginBottom: 32 }}>
+          La orden ha sido creada y enviada, puedes
+        </Text>
+
+        <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+          <Button 
+            onClick={() => {
+              setIsSuccessModalOpen(false);
+              setStep(1);
+              form1.reset();
+              form2.reset();
+            }} 
+            style={{ height: 48, borderRadius: 8, flex: 1, fontWeight: 600 }}
+          >
+            Ir a inicio
+          </Button>
+          <Button 
+            type="primary" 
+            onClick={resetAll}
+            style={{ 
+              height: 48, 
+              borderRadius: 8, 
+              flex: 1, 
+              fontWeight: 600, 
+              background: colors.backgroundPattern, 
+              borderColor: colors.backgroundPattern 
+            }}
+          >
+            Crear otra
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 }

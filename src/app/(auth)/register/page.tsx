@@ -14,21 +14,9 @@ const { Title, Text } = Typography;
 const { Content } = Layout;
 const { useBreakpoint } = Grid;
 const { Option } = Select;
+import { registerSchema } from '@/validations/auth';
 
-const schema = yup.object().shape({
-  nombre: yup.string().required('El nombre es requerido'),
-  apellido: yup.string().required('El apellido es requerido'),
-  sexo: yup.string().required('Selecciona tu sexo'),
-  fechaNacimiento: yup.date().required('La fecha es requerida'),
-  email: yup.string().email('Email inválido').required('El email es requerido'),
-  whatsapp: yup.string().required('El número es requerido'),
-  password: yup.string().min(6, 'Mínimo 6 caracteres').required('La contraseña es requerida'),
-  confirmPassword: yup.string()
-    .oneOf([yup.ref('password')], 'Las contraseñas no coinciden')
-    .required('Repetir contraseña es requerido'),
-});
-
-type FormData = yup.InferType<typeof schema>;
+type FormData = yup.InferType<typeof registerSchema>;
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -43,7 +31,7 @@ export default function RegisterPage() {
     watch,
     formState: { errors },
   } = useForm<FormData>({
-    resolver: yupResolver(schema),
+    resolver: yupResolver(registerSchema),
     defaultValues: {
       whatsapp: '',
     }
