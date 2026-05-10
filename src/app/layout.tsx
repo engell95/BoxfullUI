@@ -2,11 +2,13 @@ import React from 'react';
 import { AntdRegistry } from '@ant-design/nextjs-registry';
 import { ConfigProvider } from 'antd';
 import type { Metadata } from 'next';
+import { theme } from '@/config/theme';
 import { ReduxProvider } from '@/store/provider';
+import GlobalFeedback from '@/components/common/GlobalFeedback';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Technical Test - Boxfull',
+  title: 'Boxful - Technical Test',
   description: 'Next.js + Ant Design + Redux',
 };
 
@@ -15,14 +17,8 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => (
     <body>
       <ReduxProvider>
         <AntdRegistry>
-          <ConfigProvider
-            theme={{
-              token: {
-                colorPrimary: '#1677ff',
-                borderRadius: 6,
-              },
-            }}
-          >
+          <ConfigProvider theme={theme}>
+            <GlobalFeedback />
             {children}
           </ConfigProvider>
         </AntdRegistry>
