@@ -50,12 +50,15 @@ export default function RegisterPage() {
     <Layout style={{ minHeight: '100vh', background: '#fff' }}>
       <Content>
         <Row style={{ minHeight: '100vh' }}>
-          {/* Lado Izquierdo: Formulario */}
+          
           <Col xs={24} md={10} lg={10} xl={10} style={{ 
             display: 'flex', 
-            flexDirection: 'column', 
-            justifyContent: 'center',
-            padding: screens.xs ? '40px 20px' : '0 8%' 
+            flexDirection: 'column',
+            justifyContent: 'flex-start', 
+            padding: screens.md ? '40px' : '20px 5%', 
+            height: '100vh', 
+            overflowY: 'auto',
+            backgroundColor: '#fff'
           }}>
             <div style={{ marginBottom: 32 }}>
               <img src="/general/logo.webp" alt="Boxful" style={{ height: 40, marginBottom: 24 }} />
@@ -96,8 +99,8 @@ export default function RegisterPage() {
                       style={{ borderRadius: 8 }}
                       addonBefore={
                         <Select value={countryCode} onChange={setCountryCode} style={{ width: 90 }}>
-                          <Option value="503">+503</Option>
                           <Option value="505">+505</Option>
+                          <Option value="503">+503</Option>
                           <Option value="502">+502</Option>
                         </Select>
                       }

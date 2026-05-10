@@ -61,7 +61,7 @@ export default function LoginPage() {
             display: 'flex', 
             flexDirection: 'column', 
             justifyContent: 'center',
-            padding: screens.md ? '0 2%' : '0 10%', 
+            padding: screens.md ? '40px' : '0 10%', 
             margin: screens.md ? 0 : '40px 0'
           }}>
 
