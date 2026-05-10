@@ -3,7 +3,7 @@
 import React from 'react';
 import { Table, Typography, Button, Input, Space, DatePicker, Row, Col, Tag, Card } from 'antd';
 import { SearchOutlined, DownloadOutlined } from '@ant-design/icons';
-import { colors } from '@/styles/theme';
+import { colors } from '@/config/theme';
 
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;

@@ -2,7 +2,7 @@ import React from 'react';
 import { AntdRegistry } from '@ant-design/nextjs-registry';
 import { ConfigProvider } from 'antd';
 import type { Metadata } from 'next';
-import { theme } from '@/styles/theme';
+import { theme } from '@/config/theme';
 import { ReduxProvider } from '@/store/provider';
 import GlobalFeedback from '@/components/common/GlobalFeedback';
 import './globals.css';

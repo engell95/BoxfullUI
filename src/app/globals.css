@@ -1,8 +1,52 @@
-@import url('https://api.fontshare.com/v2/css?f[]=mona-sans@200,300,400,500,600,700,800&display=swap');
+@font-face {
+  font-family: 'Mona Sans';
+  src: url('/fonts/monasans-regular.0caa3863.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Mona Sans';
+  src: url('/fonts/monasans-semibold.a056945a.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Mona Sans';
+  src: url('/fonts/monasans-bold.85226eaf.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --color-primary: #ff5c35;
+  --color-secondary: #111827;
+  --color-background: #EDEDED;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-text-base: #050817;
+  --color-text-secondary: #4E4C4C;
+  --color-bg-layout: #f9fafb;
+  --color-border: #e5e7eb;
+  --color-bg-pattern: #2E49CE;
+  --color-black: #000000;
+  --color-white: #ffffff;
+  --color-blue-light: #93c5fd;
+  --color-blue-dark: #1e3a8a;
+  --color-emerald-dark: #064e3b;
+  --color-lime-bright: #bef264;
+  --color-: #161734;
+  --color-border-button: #2e49ce;
+}
 
 body {
   margin: 0;
@@ -12,7 +56,17 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+
 /* Ant Design resets/overrides if needed */
 .ant-btn {
   box-shadow: none !important;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):focus,
+textarea:focus,
+.ant-input:focus,
+.ant-input-focused,
+.ant-input-affix-wrapper-focused {
+  border-color: var(--color-border-button) !important;
+  box-shadow: 0 0 0 2px rgba(46, 73, 206, 0.1) !important;
 }

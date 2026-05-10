@@ -6,7 +6,7 @@ import { ArrowRightOutlined, ArrowLeftOutlined, PlusOutlined, DeleteOutlined, Bo
 import { useForm, Controller, useFieldArray } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import { colors } from '@/styles/theme';
+import { colors } from '@/config/theme';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;

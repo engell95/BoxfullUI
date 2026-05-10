@@ -6,7 +6,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/store';
 import { setError } from '@/store/slices/authSlice';
 import { LoadingOutlined, CloseCircleFilled } from '@ant-design/icons';
-import { colors } from '@/styles/theme';
+import { colors } from '@/config/theme';
 
 const { Text, Title } = Typography;
 

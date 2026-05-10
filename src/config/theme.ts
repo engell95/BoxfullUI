@@ -1,20 +1,24 @@
 import { ThemeConfig } from 'antd';
 
 export const colors = {
-  primary: '#ff5c35',       // Naranja Boxful
-  secondary: '#111827',     // Azul Marino Oscuro
-  background: '#EDEDED',
-  success: '#10b981',
-  warning: '#f59e0b',
-  error: '#ef4444',
-  textBase: '#050817',
-  textSecondary: '#4E4C4C',
-  bgLayout: '#f9fafb',
-  border: '#e5e7eb',
-  backgroundPattern: '#2E49CE',
+  primary: 'var(--color-primary)',       // Naranja Boxful
+  secondary: 'var(--color-secondary)',   // Azul Marino Oscuro
+  background: 'var(--color-background)',
+  success: 'var(--color-success)',
+  warning: 'var(--color-warning)',
+  error: 'var(--color-error)',
+  textBase: 'var(--color-text-base)',
+  textSecondary: 'var(--color-text-secondary)',
+  bgLayout: 'var(--color-bg-layout)',
+  border: 'var(--color-border)',
+  backgroundPattern: 'var(--color-bg-pattern)',
+  black: 'var(--color-black)',
+  white: 'var(--color-white)',
 };
 
+
 export const theme: ThemeConfig = {
+  cssVar: true,
   token: {
     colorPrimary: colors.primary,
     colorInfo: colors.primary,

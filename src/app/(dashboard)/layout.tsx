@@ -8,7 +8,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/store';
 import { logout } from '@/store/slices/authSlice';
 import Link from 'next/link';
-import { colors } from '@/styles/theme';
+import { colors } from '@/config/theme';
 import GlobalFeedback from '@/components/common/GlobalFeedback';
 
 const { Sider, Content, Header } = Layout;
@@ -71,12 +71,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         style={{ borderRight: '1px solid #f0f0f0' }}
       >
         <div style={{ padding: '24px 24px 40px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', marginBottom: 40 }}>
-            <div style={{ 
-              width: 32, height: 32, background: colors.primary, borderRadius: 8, marginRight: 10,
-              display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 'bold'
-            }}>b</div>
-            {!collapsed && <Text style={{ fontSize: 24, fontWeight: 700, color: colors.primary }}>boxful</Text>}
+          <div style={{ padding: '24px', display: 'flex', alignItems: 'center', gap: 12 }}>
+            <img src="/general/logo.webp" alt="Boxful" style={{ height: 32 }} />
+            {!collapsed && <Title level={4} style={{ margin: 0, color: colors.secondary }}>boxful</Title>}
           </div>
           
           {!collapsed && <Text type="secondary" style={{ fontSize: 12, fontWeight: 700, display: 'block', marginBottom: 16 }}>MENÚ</Text>}
