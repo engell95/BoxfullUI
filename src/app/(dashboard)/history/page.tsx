@@ -114,7 +114,7 @@ export default function HistoryPage() {
   };
 
   return (
-    <div style={{ maxWidth: 1100 }}>
+    <div>
       <div style={{ marginBottom: 32 }}>
         <Title level={2} style={{ fontWeight: 800, color: colors.secondary, marginBottom: 8 }}>Mis envíos</Title>
       </div>

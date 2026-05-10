@@ -54,7 +54,7 @@ export default function CreateOrderPage() {
   };
 
   return (
-    <div style={{ maxWidth: 1000 }}>
+    <div>
       <div style={{ marginBottom: 32 }}>
         <Title level={2} style={{ fontWeight: 800, color: colors.secondary, marginBottom: 8 }}>Crea una orden</Title>
         <Text style={{ fontSize: 16, color: '#4b5563' }}>
