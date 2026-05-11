@@ -1,14 +1,44 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { AuthState, User } from '@/models/auth.model';
 
-const initialState: AuthState = {
-  user: null,
-  accessToken: null,
-  isAuthenticated: false,
-  loading: false,
-  error: null,
-  success: null,
+const getInitialState = (): AuthState => {
+  if (typeof window === 'undefined') {
+    return {
+      user: null, accessToken: null, refreshToken: null, appToken: null,
+      isAuthenticated: false, loading: false, error: null, success: null,
+    };
+  }
+
+  const userStr = localStorage.getItem('user');
+  const accessToken = localStorage.getItem('accessToken');
+  const refreshToken = localStorage.getItem('refreshToken');
+  const appToken = localStorage.getItem('appToken');
+
+  // Si tenemos el token de acceso, consideramos que está autenticado inicialmente
+  const isAuthenticated = !!accessToken;
+
+  let user = null;
+  if (userStr) {
+    try {
+      user = JSON.parse(userStr);
+    } catch (e) {
+      console.error('Error parsing persisted user');
+    }
+  }
+
+  return {
+    user,
+    accessToken,
+    refreshToken,
+    appToken,
+    isAuthenticated,
+    loading: false,
+    error: null,
+    success: null,
+  };
 };
+
+const initialState: AuthState = getInitialState();
 
 
 const authSlice = createSlice({
@@ -17,14 +47,23 @@ const authSlice = createSlice({
   reducers: {
     setCredentials: (
       state,
-      action: PayloadAction<{ user: User; accessToken: string }>
+      action: PayloadAction<{ user: User; accessToken: string; refreshToken: string }>
     ) => {
-      const { user, accessToken } = action.payload;
+      const { user, accessToken, refreshToken } = action.payload;
       state.user = user;
       state.accessToken = accessToken;
+      state.refreshToken = refreshToken;
       state.isAuthenticated = true;
       if (typeof window !== 'undefined') {
         localStorage.setItem('accessToken', accessToken);
+        localStorage.setItem('refreshToken', refreshToken);
+        localStorage.setItem('user', JSON.stringify(user));
+      }
+    },
+    setAppToken: (state, action: PayloadAction<string>) => {
+      state.appToken = action.payload;
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('appToken', action.payload);
       }
     },
     logout: (state) => {
@@ -36,6 +75,7 @@ const authSlice = createSlice({
       if (typeof window !== 'undefined') {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
       }
     },
     setLoading: (state, action: PayloadAction<boolean>) => {
@@ -50,5 +90,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { setCredentials, logout, setLoading, setError, setSuccess } = authSlice.actions;
+export const { setCredentials, setAppToken, logout, setLoading, setError, setSuccess } = authSlice.actions;
 export default authSlice.reducer;

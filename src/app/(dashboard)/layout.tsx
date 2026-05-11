@@ -1,15 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Layout, Menu, Typography, Avatar, Space } from 'antd';
+import { Layout, Menu, Typography, Space } from 'antd';
 import { PlusCircleOutlined, HistoryOutlined, UserOutlined, LogoutOutlined } from '@ant-design/icons';
 import { usePathname, useRouter } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/store';
 import { logout } from '@/store/slices/authSlice';
-import Link from 'next/link';
 import { colors } from '@/config/theme';
-import GlobalFeedback from '@/components/common/GlobalFeedback';
 
 const { Sider, Content, Header } = Layout;
 const { Text, Title } = Typography;
@@ -23,11 +21,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [checking, setChecking] = useState(true);
 
   React.useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/login');
-    } else {
-      setChecking(false);
-    }
+    const checkAuth = () => {
+      const hasToken = localStorage.getItem('accessToken');
+      
+      // Solo redirigir si NO está autenticado en Redux Y TAMPOCO hay token físico
+      if (!isAuthenticated && !hasToken) {
+        router.push('/login');
+      } else {
+        // Si hay token físico o está autenticado, permitimos el paso
+        setChecking(false);
+      }
+    };
+
+    // Pequeño delay para permitir que Redux se hidrate
+    const timer = setTimeout(checkAuth, 100);
+    return () => clearTimeout(timer);
   }, [isAuthenticated, router]);
 
   if (checking) return null;

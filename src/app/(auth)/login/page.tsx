@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Form, Button, Row, Col, Typography, Layout, Grid } from 'antd';
+import { Form, Row, Col, Typography, Layout, Grid } from 'antd';
 import { useForm } from 'react-hook-form';
 import Link from 'next/link';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -18,7 +18,7 @@ import { BoxfulField } from '@/components/ui/BoxfulField';
 import BoxfulHeader from '@/components/ui/BoxfulHeader';
 import BoxfulButton from '@/components/ui/BoxfulButton';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 const { Content } = Layout;
 const { useBreakpoint } = Grid;
 
@@ -47,13 +47,10 @@ export default function LoginPage() {
         password: data.password,
       });
 
-      // Guardar tokens en localStorage para que el interceptor de axios los use
-      localStorage.setItem('accessToken', response.access_token);
-      localStorage.setItem('refreshToken', response.refresh_token);
-
       dispatch(setCredentials({ 
         user: response.user, 
-        accessToken: response.access_token 
+        accessToken: response.accessToken,
+        refreshToken: response.refreshToken
       }));
 
       router.push('/overview');

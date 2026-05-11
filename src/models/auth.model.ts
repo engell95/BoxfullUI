@@ -34,6 +34,8 @@ export interface AuthResponse {
 export interface AuthState {
   user: User | null;
   accessToken: string | null;
+  refreshToken: string | null;
+  appToken: string | null;
   isAuthenticated: boolean;
   loading: boolean;
   error: string | null;

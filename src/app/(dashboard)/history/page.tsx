@@ -72,6 +72,7 @@ const columns = [
 export default function HistoryPage() {
   const [orders, setOrders] = React.useState<Order[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [downloading, setDownloading] = React.useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = React.useState<React.Key[]>([]);
 
   React.useEffect(() => {
@@ -96,6 +97,7 @@ export default function HistoryPage() {
   };
 
   const handleDownloadCSV = async () => {
+    setDownloading(true);
     try {
       const ids = selectedRowKeys.map(key => key.toString());
       const blob = await orderService.exportOrders(ids);
@@ -110,6 +112,8 @@ export default function HistoryPage() {
       document.body.removeChild(a);
     } catch (error) {
       message.error('Error al exportar las órdenes');
+    } finally {
+      setDownloading(false);
     }
   };
 
@@ -143,6 +147,8 @@ export default function HistoryPage() {
             <Button 
               icon={<DownloadOutlined />} 
               onClick={handleDownloadCSV}
+              loading={downloading}
+              disabled={downloading}
               style={{ height: 40, borderRadius: 8, padding: '0 24px' }}
             >
               Descargar órdenes
