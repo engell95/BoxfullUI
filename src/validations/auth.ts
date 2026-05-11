@@ -6,10 +6,10 @@ export const loginSchema = yup.object().shape({
 });
 
 export const registerSchema = yup.object().shape({
-  nombre: yup.string().required('El nombre es requerido'),
-  apellido: yup.string().required('El apellido es requerido'),
-  sexo: yup.string().required('Selecciona tu sexo'),
-  fechaNacimiento: yup.date().required('La fecha es requerida'),
+  firstName: yup.string().required('El nombre es requerido'),
+  lastName: yup.string().required('El apellido es requerido'),
+  gender: yup.string().optional(),
+  dateOfBirth: yup.string().optional(),
   email: yup.string().email('Email inválido').required('El email es requerido'),
   whatsapp: yup.string().required('El número es requerido'),
   password: yup.string().min(6, 'Mínimo 6 caracteres').required('La contraseña es requerida'),

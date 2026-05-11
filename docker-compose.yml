@@ -12,5 +12,5 @@ services:
       - /app/node_modules
       - /app/.next
     environment:
-      - NEXT_PUBLIC_API_URL=${API_URL:-http://localhost:4000}
+      - NEXT_PUBLIC_API_URL=${API_URL:-http://localhost:3001/api/v1/}
       - WATCHPACK_POLLING=true

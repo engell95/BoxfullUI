@@ -22,7 +22,12 @@ api.interceptors.response.use(
       originalRequest._retry = true;
       try {
         const refreshToken = localStorage.getItem('refreshToken');
-        const response = await axios.post(`${api.defaults.baseURL}/auth/refresh`, {
+        
+        if (!refreshToken) {
+          return api(originalRequest);
+        }
+
+        const response = await axios.post(`${api.defaults.baseURL}auth/refresh`, {
           refreshToken,
         });
         const { accessToken } = response.data;
@@ -32,11 +37,14 @@ api.interceptors.response.use(
       } catch (refreshError) {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
-        if (typeof window !== 'undefined') {
+        if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
           window.location.href = '/login';
         }
         return Promise.reject(refreshError);
       }
+    }
+    if (error.response?.data?.detail) {
+      console.warn(`[RFC 9457 Error] ${error.response.data.title}: ${error.response.data.detail}`);
     }
     return Promise.reject(error);
   }

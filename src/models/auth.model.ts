@@ -1,14 +1,18 @@
 export interface User {
   id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
-  role?: 'admin' | 'user';
-  avatar?: string;
+  role: string;
+  company?: {
+    id: string;
+    name: string;
+  };
 }
 
 export interface AuthCredentials {
   email: string;
-  password?: string; // Opcional porque no siempre lo devolvemos
+  password?: string; 
 }
 
 export interface AuthResponse {
@@ -24,4 +28,5 @@ export interface AuthState {
   isAuthenticated: boolean;
   loading: boolean;
   error: string | null;
+  success: string | null;
 }

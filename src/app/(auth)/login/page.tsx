@@ -9,10 +9,11 @@ import * as yup from 'yup';
 import { useDispatch } from 'react-redux';
 import { useRouter } from 'next/navigation';
 import { setCredentials, setLoading, setError } from '@/store/slices/authSlice';
-import api from '@/lib/axios';
 import { colors } from '@/config/theme';
 import { loginSchema } from '@/validations/auth';
+import { authService } from '@/services/authService';
 import { AuthSidebar } from '@/components/auth';
+import { getErrorMessage } from '@/utils/error-handler';
 
 const { Title, Text } = Typography;
 const { Content } = Layout;
@@ -35,21 +36,31 @@ export default function LoginPage() {
 
   const onSubmit = async (data: FormData) => {
     dispatch(setLoading(true));
+    dispatch(setError(null));
     
-    // Simulación de login
-    setTimeout(() => {
+    try {
+      const response = await authService.login({
+        email: data.email,
+        password: data.password,
+      });
+
+      // Guardar tokens en localStorage para que el interceptor de axios los use
+      localStorage.setItem('accessToken', response.access_token);
+      localStorage.setItem('refreshToken', response.refresh_token);
+
       dispatch(setCredentials({ 
-        user: { 
-          id: '1', 
-          name: 'Usuario Prueba', 
-          email: data.email 
-        }, 
-        accessToken: 'mock-jwt-token' 
+        user: response.user, 
+        accessToken: response.access_token 
       }));
 
-      dispatch(setLoading(false));
       router.push('/overview');
-    }, 1500);
+    } catch (error: any) {
+      const message = getErrorMessage(error);
+      dispatch(setError(message));
+      console.error('Login error:', error);
+    } finally {
+      dispatch(setLoading(false));
+    }
   };
 
   return (
@@ -71,7 +82,7 @@ export default function LoginPage() {
               <Text style={{ fontSize: 14, color: colors.black,height:'auto' }}>Por favor ingresa tus credenciales</Text>
             </div>
 
-            <Form layout="vertical" onFinish={handleSubmit(onSubmit)} size="middle">
+            <Form layout="vertical" onFinish={() => handleSubmit(onSubmit)()} size="middle">
               <Form.Item 
               label={<Text strong style={{ fontSize: 12, color: colors.black }}>Correo Electrónico</Text>}
                validateStatus={errors.email ? 'error' : ''} 

@@ -2,14 +2,18 @@
 
 import React, { useState } from 'react';
 import { Form, Input, Button, Row, Col, Typography, Layout, Grid, Select, Modal } from 'antd';
-import { ArrowLeftOutlined, CheckCircleFilled } from '@ant-design/icons';
+import { ArrowLeftOutlined, WarningFilled } from '@ant-design/icons';
 import { useForm, Controller } from 'react-hook-form';
 import Link from 'next/link';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { useRouter } from 'next/navigation';
+import { useDispatch } from 'react-redux';
 import { registerSchema } from '@/validations/auth';
+import { authService } from '@/services/authService';
 import { AuthSidebar } from '@/components/auth';
+import { getErrorMessage } from '@/utils/error-handler';
+import { setLoading, setError, setSuccess } from '@/store/slices/authSlice';
 
 const { Title, Text } = Typography;
 const { Content } = Layout;
@@ -20,6 +24,7 @@ type FormData = yup.InferType<typeof registerSchema>;
 
 export default function RegisterPage() {
   const router = useRouter();
+  const dispatch = useDispatch();
   const screens = useBreakpoint();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [tempData, setTempData] = useState<FormData | null>(null);
@@ -41,9 +46,35 @@ export default function RegisterPage() {
     setIsModalOpen(true);
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
+    if (!tempData) return;
+    
+    // Cerrar el modal de confirmación y activar carga global
     setIsModalOpen(false);
-    router.push('/login');
+    dispatch(setLoading(true));
+    dispatch(setError(null));
+    dispatch(setSuccess(null));
+    
+    try {
+      const response = await authService.register({
+        firstName: tempData.firstName,
+        lastName: tempData.lastName,
+        email: tempData.email,
+        password: tempData.password,
+        whatsapp: `${countryCode}${tempData.whatsapp}`,
+        gender: tempData.gender || 'OTHER',
+        dateOfBirth: tempData.dateOfBirth,
+      });
+
+      dispatch(setSuccess('Tu cuenta ha sido creada correctamente. Ahora puedes iniciar sesión.'));
+      router.push('/login');
+    } catch (error: any) {
+      const message = getErrorMessage(error);
+      console.error('Registration error:', error);
+      dispatch(setError(message));
+    } finally {
+      dispatch(setLoading(false));
+    }
   };
 
   return (
@@ -70,16 +101,16 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            <Form layout="vertical" onFinish={handleSubmit(onSubmit)} size="large">
+            <Form layout="vertical" onFinish={() => handleSubmit(onSubmit)()} size="large">
               <Row gutter={16}>
                 <Col span={12}>
-                  <Form.Item label={<Text strong style={{ fontSize: 12 }}>Nombre</Text>} validateStatus={errors.nombre ? 'error' : ''} help={errors.nombre?.message}>
-                    <Controller name="nombre" control={control} render={({ field }) => <Input {...field} placeholder="Paco" style={{ borderRadius: 8 }} />} />
+                  <Form.Item label={<Text strong style={{ fontSize: 12 }}>Nombre</Text>} validateStatus={errors.firstName ? 'error' : ''} help={errors.firstName?.message}>
+                    <Controller name="firstName" control={control} render={({ field }) => <Input {...field} placeholder="Paco" style={{ borderRadius: 8 }} />} />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
-                  <Form.Item label={<Text strong style={{ fontSize: 12 }}>Apellido</Text>} validateStatus={errors.apellido ? 'error' : ''} help={errors.apellido?.message}>
-                    <Controller name="apellido" control={control} render={({ field }) => <Input {...field} placeholder="Heras" style={{ borderRadius: 8 }} />} />
+                  <Form.Item label={<Text strong style={{ fontSize: 12 }}>Apellido</Text>} validateStatus={errors.lastName ? 'error' : ''} help={errors.lastName?.message}>
+                    <Controller name="lastName" control={control} render={({ field }) => <Input {...field} placeholder="Heras" style={{ borderRadius: 8 }} />} />
                   </Form.Item>
                 </Col>
               </Row>
@@ -142,28 +173,68 @@ export default function RegisterPage() {
         </Row>
       </Content>
 
-      {/* Modal de Confirmación */}
       <Modal
         open={isModalOpen}
         onCancel={() => setIsModalOpen(false)}
         footer={null}
         centered
-        width={400}
-        bodyStyle={{ padding: '40px 24px', textAlign: 'center' }}
+        closable
+        width={450}
+        styles={{
+          body: { padding: '32px 24px' }
+        }}
       >
-        <CheckCircleFilled style={{ fontSize: 60, color: '#166534', marginBottom: 24 }} />
-        <Title level={3}>¡Casi listo!</Title>
-        <Text style={{ fontSize: 16, color: '#4b5563', display: 'block', marginBottom: 32 }}>
-          Te enviaremos un código de confirmación a tu Whatsapp <Text strong>{countryCode} {tempData?.whatsapp}</Text>
-        </Text>
-        <Button 
-          type="primary" 
-          block 
-          onClick={handleConfirm}
-          style={{ height: 48, borderRadius: 8, background: '#1a1a2e', borderColor: '#1a1a2e' }}
-        >
-          Confirmar y registrarme
-        </Button>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ 
+            background: '#FFF7ED', 
+            width: 80, 
+            height: 80, 
+            borderRadius: '50%', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            margin: '0 auto 24px'
+          }}>
+            <WarningFilled style={{ fontSize: 40, color: '#F97316' }} />
+          </div>
+          
+          <Title level={4} style={{ marginBottom: 12, fontWeight: 700 }}>
+            Confirmar número <span style={{ fontWeight: 800 }}>de teléfono</span>
+          </Title>
+          
+          <Text style={{ fontSize: 15, color: '#4B5563', display: 'block', marginBottom: 32 }}>
+            ¿Está seguro de que desea continuar con el número <Text strong>+{countryCode} {tempData?.whatsapp}?</Text>
+          </Text>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
+            <Button 
+              onClick={() => setIsModalOpen(false)}
+              style={{ 
+                height: 44, 
+                borderRadius: 8, 
+                padding: '0 24px',
+                fontWeight: 600,
+                color: '#374151'
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button 
+              type="primary" 
+              onClick={handleConfirm}
+              style={{ 
+                height: 44, 
+                borderRadius: 8, 
+                background: '#2563EB', 
+                borderColor: '#2563EB',
+                padding: '0 32px',
+                fontWeight: 600
+              }}
+            >
+              Aceptar
+            </Button>
+          </div>
+        </div>
       </Modal>
     </Layout>
   );
