@@ -14,6 +14,9 @@ import { authService } from '@/services/authService';
 import { AuthSidebar } from '@/components/auth';
 import { getErrorMessage } from '@/utils/error-handler';
 import { setLoading, setError, setSuccess } from '@/store/slices/authSlice';
+import { BoxfulField } from '@/components/ui/BoxfulField';
+import BoxfulHeader from '@/components/ui/BoxfulHeader';
+import BoxfulButton from '@/components/ui/BoxfulButton';
 
 const { Title, Text } = Typography;
 const { Content } = Layout;
@@ -97,73 +100,122 @@ export default function RegisterPage() {
                 <Link href="/login" style={{ color: '#000', fontSize: 24, display: 'flex', alignItems: 'center' }}>
                   <ArrowLeftOutlined />
                 </Link>
-                <Title level={2} style={{ fontWeight: 800, margin: 0 }}>Cuéntanos de ti</Title>
+                <BoxfulHeader 
+                  title="Cuéntanos de ti" 
+                  subtitle="Completa la información de registro"
+                  marginBottom={0} 
+                />
               </div>
             </div>
 
             <Form layout="vertical" onFinish={() => handleSubmit(onSubmit)()} size="large">
               <Row gutter={16}>
                 <Col span={12}>
-                  <Form.Item label={<Text strong style={{ fontSize: 12 }}>Nombre</Text>} validateStatus={errors.firstName ? 'error' : ''} help={errors.firstName?.message}>
-                    <Controller name="firstName" control={control} render={({ field }) => <Input {...field} placeholder="Paco" style={{ borderRadius: 8 }} />} />
-                  </Form.Item>
+                  <BoxfulField
+                    name="firstName"
+                    control={control}
+                    label="Nombre"
+                    placeholder="Digita tu nombre"
+                    error={errors.firstName?.message}
+                  />
                 </Col>
                 <Col span={12}>
-                  <Form.Item label={<Text strong style={{ fontSize: 12 }}>Apellido</Text>} validateStatus={errors.lastName ? 'error' : ''} help={errors.lastName?.message}>
-                    <Controller name="lastName" control={control} render={({ field }) => <Input {...field} placeholder="Heras" style={{ borderRadius: 8 }} />} />
-                  </Form.Item>
+                  <BoxfulField
+                    name="lastName"
+                    control={control}
+                    label="Apellido"
+                    placeholder="Digita tu apellido"
+                    error={errors.lastName?.message}
+                  />
                 </Col>
               </Row>
 
-              <Form.Item label={<Text strong style={{ fontSize: 12 }}>Correo Electrónico</Text>} validateStatus={errors.email ? 'error' : ''} help={errors.email?.message}>
-                <Controller name="email" control={control} render={({ field }) => <Input {...field} placeholder="pacoheras@boxful.com" style={{ borderRadius: 8 }} />} />
-              </Form.Item>
+              <Row gutter={16}>
+                <Col span={12}>
+                  <BoxfulField
+                    name="gender"
+                    control={control}
+                    label="Sexo"
+                    type="select"
+                    placeholder="Seleccionar"
+                    options={[
+                      { label: 'Masculino', value: 'MALE' },
+                      { label: 'Femenino', value: 'FEMALE' },
+                      { label: 'Otro', value: 'OTHER' },
+                    ]}
+                    error={errors.gender?.message}
+                  />
+                </Col>
+                <Col span={12}>
+                  <BoxfulField
+                    name="dateOfBirth"
+                    control={control}
+                    label="Fecha de nacimiento"
+                    type="date"
+                    placeholder="Seleccionar"
+                    error={errors.dateOfBirth?.message}
+                  />
+                </Col>
+              </Row>
 
-              <Form.Item label={<Text strong style={{ fontSize: 12 }}>Número de Whatsapp</Text>} validateStatus={errors.whatsapp ? 'error' : ''} help={errors.whatsapp?.message}>
-                <Controller
-                  name="whatsapp"
-                  control={control}
-                  render={({ field }) => (
-                    <Input 
-                      {...field} 
-                      placeholder="7777 7777" 
-                      style={{ borderRadius: 8 }}
-                      addonBefore={
-                        <Select value={countryCode} onChange={setCountryCode} style={{ width: 90 }}>
-                          <Option value="505">+505</Option>
-                          <Option value="503">+503</Option>
-                          <Option value="502">+502</Option>
-                        </Select>
-                      }
-                    />
-                  )}
-                />
-              </Form.Item>
+              <Row gutter={16}>
+                <Col span={12}>
+                  <BoxfulField
+                    name="email"
+                    control={control}
+                    label="Correo electrónico"
+                    placeholder="Digitar correo"
+                    error={errors.email?.message}
+                  />
+                </Col>
+                <Col span={12}>
+                  <BoxfulField
+                    name="whatsapp"
+                    control={control}
+                    label="Número de whatsapp"
+                    placeholder="7777 7777"
+                    error={errors.whatsapp?.message}
+                    addonBefore={
+                      <Select value={countryCode} onChange={setCountryCode} style={{ width: 90 }}>
+                        <Option value="503">503</Option>
+                        <Option value="505">505</Option>
+                        <Option value="502">502</Option>
+                      </Select>
+                    }
+                  />
+                </Col>
+              </Row>
 
-              <Form.Item label={<Text strong style={{ fontSize: 12 }}>Contraseña</Text>} validateStatus={errors.password ? 'error' : ''} help={errors.password?.message}>
-                <Controller name="password" control={control} render={({ field }) => <Input.Password {...field} placeholder="••••••••" style={{ borderRadius: 8 }} />} />
-              </Form.Item>
-
-              <Form.Item label={<Text strong style={{ fontSize: 12 }}>Repite tu contraseña</Text>} validateStatus={errors.confirmPassword ? 'error' : ''} help={errors.confirmPassword?.message}>
-                <Controller name="confirmPassword" control={control} render={({ field }) => <Input.Password {...field} placeholder="••••••••" style={{ borderRadius: 8 }} />} />
-              </Form.Item>
+              <Row gutter={16}>
+                <Col span={12}>
+                  <BoxfulField
+                    name="password"
+                    control={control}
+                    label="Contraseña"
+                    placeholder="Digitar contraseña"
+                    type="password"
+                    error={errors.password?.message}
+                  />
+                </Col>
+                <Col span={12}>
+                  <BoxfulField
+                    name="confirmPassword"
+                    control={control}
+                    label="Repetir contraseña"
+                    placeholder="Digitar contraseña"
+                    type="password"
+                    error={errors.confirmPassword?.message}
+                  />
+                </Col>
+              </Row>
 
               <Form.Item style={{ marginTop: 40 }}>
-                <Button 
-                  type="primary" 
+                <BoxfulButton 
                   htmlType="submit" 
-                  block 
-                  style={{ 
-                    height: 50, 
-                    background: '#1a1a2e', 
-                    borderColor: '#1a1a2e', 
-                    borderRadius: 8,
-                    fontSize: 16,
-                    fontWeight: 600
-                  }}
+                  size="large"
                 >
                   Siguiente
-                </Button>
+                </BoxfulButton>
               </Form.Item>
             </Form>
           </Col>
@@ -207,32 +259,22 @@ export default function RegisterPage() {
           </Text>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
-            <Button 
+            <BoxfulButton 
+              variant="outline"
               onClick={() => setIsModalOpen(false)}
-              style={{ 
-                height: 44, 
-                borderRadius: 8, 
-                padding: '0 24px',
-                fontWeight: 600,
-                color: '#374151'
-              }}
+              fullWidth={false}
+              style={{ padding: '0 24px' }}
             >
               Cancelar
-            </Button>
-            <Button 
-              type="primary" 
+            </BoxfulButton>
+            <BoxfulButton 
+              variant="secondary" 
               onClick={handleConfirm}
-              style={{ 
-                height: 44, 
-                borderRadius: 8, 
-                background: '#2563EB', 
-                borderColor: '#2563EB',
-                padding: '0 32px',
-                fontWeight: 600
-              }}
+              fullWidth={false}
+              style={{ padding: '0 32px' }}
             >
               Aceptar
-            </Button>
+            </BoxfulButton>
           </div>
         </div>
       </Modal>

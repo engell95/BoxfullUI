@@ -1,5 +1,5 @@
 import api from '@/lib/axios';
-import { LoginDto, RegisterDto, AuthResponse } from '@/types/auth';
+import { LoginCredentials, RegisterDto, AuthResponse } from '@/models/auth.model';
 
 const APP_ID = process.env.NEXT_PUBLIC_APP_ID;
 const APP_SECRET = process.env.NEXT_PUBLIC_APP_SECRET;
@@ -19,7 +19,7 @@ export const authService = {
   /**
    * Inicia sesión de usuario
    */
-  async login(data: LoginDto): Promise<AuthResponse> {
+  async login(data: LoginCredentials): Promise<AuthResponse> {
     // 1. Obtener App Token
     const appToken = await this.getAppToken();
     
