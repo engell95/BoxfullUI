@@ -12,54 +12,60 @@ import { message } from 'antd';
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
 
-interface OrderData {
-  key: string;
-  orderNo: string;
-  nombre: string;
-  apellidos: string;
-  departamento: string;
-  municipio: string;
-  paquetes: number;
-}
-
 const columns = [
   {
     title: 'No. de orden',
     dataIndex: 'orderNo',
     key: 'orderNo',
-    render: (text: string) => <Text strong>{text}</Text>,
+    render: (text: string, record: Order) => <Text strong>{record.id?.slice(-6).toUpperCase() || 'N/A'}</Text>,
   },
   {
     title: 'Nombre',
-    dataIndex: 'nombre',
-    key: 'nombre',
+    dataIndex: 'recipientFirstName',
+    key: 'recipientFirstName',
   },
   {
     title: 'Apellidos',
-    dataIndex: 'apellidos',
-    key: 'apellidos',
+    dataIndex: 'recipientLastName',
+    key: 'recipientLastName',
   },
   {
     title: 'Departamento',
-    dataIndex: 'departamento',
-    key: 'departamento',
+    dataIndex: 'recipientDepartment',
+    key: 'recipientDepartment',
   },
   {
     title: 'Municipio',
-    dataIndex: 'municipio',
-    key: 'municipio',
+    dataIndex: 'recipientMunicipality',
+    key: 'recipientMunicipality',
   },
   {
-    title: 'Paquetes en orden',
-    dataIndex: 'paquetes',
-    key: 'paquetes',
-    render: (count: number) => (
-      <div style={{ textAlign: 'center' }}>
-        <Tag color="#F0FDF4" style={{ color: '#166534', border: '1px solid #BBF7D0', borderRadius: 4, padding: '0 8px' }}>
-          {count}
-        </Tag>
-      </div>
+    title: 'Paquetes',
+    dataIndex: 'packages',
+    key: 'packages',
+    render: (packages: any[]) => (
+      <Tag color="#F0FDF4" style={{ color: '#166534', border: '1px solid #BBF7D0', borderRadius: 4 }}>
+        {packages?.length || 0}
+      </Tag>
     ),
+  },
+  {
+    title: 'Estado',
+    dataIndex: 'status',
+    key: 'status',
+    render: (status: string) => {
+      let color = 'default';
+      let label = status;
+      
+      switch (status) {
+        case 'PENDING': color = 'orange'; label = 'Pendiente'; break;
+        case 'SHIPPED': color = 'blue'; label = 'Enviado'; break;
+        case 'DELIVERED': color = 'green'; label = 'Entregado'; break;
+        case 'CANCELLED': color = 'red'; label = 'Cancelado'; break;
+      }
+      
+      return <Tag color={color}>{label}</Tag>;
+    }
   },
 ];
 
@@ -77,6 +83,7 @@ export default function HistoryPage() {
     try {
       const data = await orderService.getOrders();
       setOrders(data);
+      console.log(data)
     } catch (error) {
       message.error(getErrorMessage(error));
     } finally {
@@ -106,16 +113,6 @@ export default function HistoryPage() {
     }
   };
 
-  // Mapear órdenes del API al formato de la tabla
-  const dataSource = orders.map(order => ({
-    key: order.id || '',
-    orderNo: order.orderNo || 'N/A',
-    nombre: order.recipientFirstName,
-    apellidos: order.recipientLastName,
-    departamento: order.recipientDepartment,
-    municipio: order.recipientMunicipality,
-    paquetes: order.packages.length,
-  }));
 
   return (
     <div>
@@ -135,6 +132,8 @@ export default function HistoryPage() {
             <Button 
               type="primary" 
               icon={<SearchOutlined />} 
+              onClick={fetchOrders}
+              loading={loading}
               style={{ background: colors.backgroundPattern, borderColor: colors.backgroundPattern, height: 40, borderRadius: 8, padding: '0 24px' }}
             >
               Buscar
@@ -152,13 +151,14 @@ export default function HistoryPage() {
         </Row>
 
         <Table 
+          rowKey="id"
           rowSelection={{ 
             type: 'checkbox',
             selectedRowKeys,
             onChange: onSelectChange,
           }}
           columns={columns} 
-          dataSource={dataSource} 
+          dataSource={orders} 
           loading={loading}
           pagination={{ pageSize: 10 }}
           style={{ background: '#fff' }}

@@ -8,7 +8,7 @@ class OrderService {
   async getOrders(): Promise<Order[]> {
     try {
       const response = await api.get('/orders');
-      return response.data;
+      return response.data?.data;
     } catch (error) {
       console.error('Error fetching orders:', error);
       throw error;

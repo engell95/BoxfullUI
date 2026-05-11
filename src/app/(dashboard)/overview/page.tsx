@@ -36,7 +36,7 @@ export default function CreateOrderPage() {
     resolver: yupResolver(orderStep1Schema),
     defaultValues: {
       direccionRecoleccion: '',
-      fechaProgramada: null,
+      fechaProgramada: undefined,
       nombres: '',
       apellidos: '',
       email: '',
@@ -148,8 +148,24 @@ export default function CreateOrderPage() {
   };
 
   const resetAll = () => {
-    form1.reset();
-    form2.reset();
+    form1.reset({
+      direccionRecoleccion: '',
+      fechaProgramada: undefined,
+      nombres: '',
+      apellidos: '',
+      email: '',
+      telefono: '',
+      direccionDestinatario: '',
+      departamento: '',
+      municipio: '',
+      puntoReferencia: '',
+      indicaciones: '',
+      isCOD: false,
+      expectedAmount: 0
+    });
+    form2.reset({
+      productos: []
+    });
     setStep(1);
     setIsSuccessModalOpen(false);
   };
@@ -265,7 +281,6 @@ export default function CreateOrderPage() {
                     placeholder="Seleccionar"
                     options={municipalities.map(m => ({ label: m.name, value: m.name }))}
                     error={form1.formState.errors.municipio?.message}
-                    disabled={municipalities.length === 0}
                   />
                 </Col>
                 <Col span={8}>
@@ -352,7 +367,7 @@ export default function CreateOrderPage() {
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 24 }}>
-                <BoxfulButton type="primary" htmlType="submit" size="large" fullWidth={false} style={{ padding: '0 40px' }}>
+                <BoxfulButton variant="primary" htmlType="submit" size="large" fullWidth={false} style={{ padding: '0 40px' }}>
                   Siguiente <ArrowRightOutlined />
                 </BoxfulButton>
               </div>

@@ -33,6 +33,7 @@ export interface Order {
   realAmount?: number;
   packages: Package[];
   createdAt?: string;
+  status: OrderStatus;
 }
 
 export interface OrderResponse {
