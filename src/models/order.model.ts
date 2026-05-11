@@ -1,37 +1,37 @@
-export interface Product {
-  id?: string;
-  largo: string;
-  alto: string;
-  ancho: string;
-  peso: string;
-  contenido: string;
+export interface Package {
+  content: string;
+  weightInLbs: number;
+  width: number;
+  height: number;
+  length: number;
 }
 
-export interface OrderAddress {
-  direccion: string;
-  departamento: string;
-  municipio: string;
-  puntoReferencia?: string;
-  indicaciones?: string;
-}
-
-export interface Recipient {
-  nombres: string;
-  apellidos: string;
-  email: string;
-  telefono: string;
+export enum OrderStatus {
+  PENDING = 'PENDING',
+  SHIPPED = 'SHIPPED',
+  DELIVERED = 'DELIVERED',
+  CANCELLED = 'CANCELLED'
 }
 
 export interface Order {
   id?: string;
   orderNo?: string;
-  recoleccion: {
-    direccion: string;
-    fecha: string;
-  };
-  destinatario: Recipient & { direccion: OrderAddress };
-  productos: Product[];
-  status: 'pending' | 'shipped' | 'delivered' | 'cancelled';
+  userId?: string;
+  companyId?: string;
+  pickupAddress: string;
+  recipientFirstName: string;
+  recipientLastName: string;
+  recipientEmail: string;
+  recipientPhone: string;
+  recipientAddress: string;
+  recipientMunicipality: string;
+  recipientDepartment: string;
+  deliveryDate: string | Date;
+  instructions?: string;
+  isCOD: boolean;
+  expectedAmount?: number;
+  realAmount?: number;
+  packages: Package[];
   createdAt?: string;
 }
 

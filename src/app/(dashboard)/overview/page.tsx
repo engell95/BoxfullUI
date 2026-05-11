@@ -8,18 +8,87 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { colors } from '@/config/theme';
 
+import { orderStep1Schema, orderStep2Schema } from '@/validations/order';
+import { orderService } from '@/services/orderService';
+import { locationService, LocationItem } from '@/services/locationService';
+import { useDispatch } from 'react-redux';
+import { setLoading, setError } from '@/store/slices/authSlice';
+import { getErrorMessage } from '@/utils/error-handler';
+import { BoxfulField } from '@/components/ui/BoxfulField';
+import BoxfulButton from '@/components/ui/BoxfulButton';
+import { Switch } from 'antd';
+import dayjs from 'dayjs';
+
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 const { Option } = Select;
-import { orderStep1Schema, orderStep2Schema } from '@/validations/order';
 
 export default function CreateOrderPage() {
+  const dispatch = useDispatch();
   const [step, setStep] = useState(1);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   
+  const [departments, setDepartments] = useState<LocationItem[]>([]);
+  const [municipalities, setMunicipalities] = useState<LocationItem[]>([]);
+  const [loadingLocations, setLoadingLocations] = useState(false);
+
   const form1 = useForm({
     resolver: yupResolver(orderStep1Schema),
+    defaultValues: {
+      direccionRecoleccion: '',
+      fechaProgramada: null,
+      nombres: '',
+      apellidos: '',
+      email: '',
+      telefono: '',
+      direccionDestinatario: '',
+      departamento: '',
+      municipio: '',
+      puntoReferencia: '',
+      indicaciones: '',
+      isCOD: false,
+      expectedAmount: 0
+    }
   });
+
+  const selectedDeptName = form1.watch('departamento');
+
+  // Cargar departamentos al inicio
+  React.useEffect(() => {
+    const fetchDeps = async () => {
+      try {
+        const deps = await locationService.getDepartments();
+        setDepartments(deps);
+      } catch (error) {
+        console.error('Error loading departments');
+      }
+    };
+    fetchDeps();
+  }, []);
+
+  // Efecto para reaccionar al cambio de departamento
+  React.useEffect(() => {
+    if (selectedDeptName) {
+      const dept = departments.find(d => d.name === selectedDeptName || d.id === selectedDeptName);
+      if (dept) {
+        handleDepartmentChange(dept.id);
+      }
+    }
+  }, [selectedDeptName, departments]);
+
+  // Cargar municipios cuando cambia el departamento
+  const handleDepartmentChange = async (deptId: string) => {
+    setLoadingLocations(true);
+    form1.setValue('municipio', ''); // Limpiar municipio previo
+    try {
+      const munis = await locationService.getMunicipalities(deptId);
+      setMunicipalities(munis);
+    } catch (error) {
+      console.error('Error loading municipalities');
+    } finally {
+      setLoadingLocations(false);
+    }
+  };
 
   const form2 = useForm({
     resolver: yupResolver(orderStep2Schema),
@@ -41,9 +110,41 @@ export default function CreateOrderPage() {
   const handleNext = () => setStep(2);
   const handleBack = () => setStep(1);
 
-  const onFinalSubmit = (data: any) => {
-    console.log('Orden Completa:', { ...form1.getValues(), ...data });
-    setIsSuccessModalOpen(true);
+  const onFinalSubmit = async (data: any) => {
+    const step1Data = form1.getValues();
+    
+    // Mapear al modelo exacto del backend
+    const finalData = {
+      pickupAddress: step1Data.direccionRecoleccion,
+      deliveryDate: step1Data.fechaProgramada ? dayjs(step1Data.fechaProgramada).toISOString() : dayjs().toISOString(),
+      recipientFirstName: step1Data.nombres,
+      recipientLastName: step1Data.apellidos,
+      recipientEmail: step1Data.email,
+      recipientPhone: step1Data.telefono,
+      recipientAddress: step1Data.direccionDestinatario,
+      recipientMunicipality: step1Data.municipio,
+      recipientDepartment: step1Data.departamento,
+      instructions: step1Data.indicaciones,
+      isCOD: step1Data.isCOD,
+      expectedAmount: step1Data.isCOD ? Number(step1Data.expectedAmount) : 0,
+      packages: data.productos.map((p: any) => ({
+        content: p.contenido,
+        weightInLbs: Number(p.peso.split(' ')[0]) || 0,
+        width: Number(p.ancho),
+        height: Number(p.alto),
+        length: Number(p.largo),
+      }))
+    };
+
+    dispatch(setLoading(true));
+    try {
+      await orderService.createOrder(finalData);
+      setIsSuccessModalOpen(true);
+    } catch (error) {
+      dispatch(setError(getErrorMessage(error)));
+    } finally {
+      dispatch(setLoading(false));
+    }
   };
 
   const resetAll = () => {
@@ -69,91 +170,191 @@ export default function CreateOrderPage() {
             <Form layout="vertical" onFinish={form1.handleSubmit(handleNext)} size="large">
               <Row gutter={24}>
                 <Col span={16}>
-                  <Form.Item label="Dirección de recolección">
-                    <Controller name="direccionRecoleccion" control={form1.control} render={({ field }) => <Input {...field} placeholder="Colonia Las Magnolias, calle militar 1, San Salvador" />} />
-                  </Form.Item>
+                  <BoxfulField
+                    name="direccionRecoleccion"
+                    control={form1.control}
+                    label="Dirección de recolección"
+                    placeholder="Colonia Las Magnolias, calle militar 1, San Salvador"
+                    error={form1.formState.errors.direccionRecoleccion?.message}
+                  />
                 </Col>
                 <Col span={8}>
-                  <Form.Item label="Fecha programada">
-                    <Controller name="fechaProgramada" control={form1.control} render={({ field }) => <DatePicker {...field} style={{ width: '100%' }} />} />
-                  </Form.Item>
+                  <BoxfulField
+                    name="fechaProgramada"
+                    control={form1.control}
+                    label="Fecha programada"
+                    type="date"
+                    error={form1.formState.errors.fechaProgramada?.message}
+                  />
                 </Col>
               </Row>
               <Row gutter={24}>
                 <Col span={8}>
-                  <Form.Item label="Nombres" validateStatus={form1.formState.errors.nombres ? 'error' : ''} help={form1.formState.errors.nombres?.message}>
-                    <Controller name="nombres" control={form1.control} render={({ field }) => <Input {...field} placeholder="Gabriela Reneé" />} />
-                  </Form.Item>
+                  <BoxfulField
+                    name="nombres"
+                    control={form1.control}
+                    label="Nombres"
+                    placeholder="Gabriela Reneé"
+                    error={form1.formState.errors.nombres?.message}
+                  />
                 </Col>
                 <Col span={8}>
-                  <Form.Item label="Apellidos" validateStatus={form1.formState.errors.apellidos ? 'error' : ''} help={form1.formState.errors.apellidos?.message}>
-                    <Controller name="apellidos" control={form1.control} render={({ field }) => <Input {...field} placeholder="Días López" />} />
-                  </Form.Item>
+                  <BoxfulField
+                    name="apellidos"
+                    control={form1.control}
+                    label="Apellidos"
+                    placeholder="Días López"
+                    error={form1.formState.errors.apellidos?.message}
+                  />
                 </Col>
                 <Col span={8}>
-                  <Form.Item label="Correo electrónico" validateStatus={form1.formState.errors.email ? 'error' : ''} help={form1.formState.errors.email?.message}>
-                    <Controller name="email" control={form1.control} render={({ field }) => <Input {...field} placeholder="gabbydiaz@gmail.com" />} />
-                  </Form.Item>
+                  <BoxfulField
+                    name="email"
+                    control={form1.control}
+                    label="Correo electrónico"
+                    placeholder="gabbydiaz@gmail.com"
+                    error={form1.formState.errors.email?.message}
+                  />
                 </Col>
               </Row>
 
               <Row gutter={24}>
                 <Col span={8}>
-                  <Form.Item label="Teléfono" validateStatus={form1.formState.errors.telefono ? 'error' : ''} help={form1.formState.errors.telefono?.message}>
-                    <Controller
-                      name="telefono"
-                      control={form1.control}
-                      render={({ field }) => (
-                        <Input 
-                          {...field} 
-                          placeholder="7777 7777" 
-                          addonBefore={
-                            <Select defaultValue="503" style={{ width: 80 }}>
-                              <Option value="503">503</Option>
-                            </Select>
-                          }
-                        />
-                      )}
-                    />
-                  </Form.Item>
+                  <BoxfulField
+                    name="telefono"
+                    control={form1.control}
+                    label="Teléfono"
+                    placeholder="7777 7777"
+                    error={form1.formState.errors.telefono?.message}
+                    addonBefore={
+                      <Select defaultValue="503" style={{ width: 80 }}>
+                        <Option value="503">503</Option>
+                      </Select>
+                    }
+                  />
                 </Col>
                 <Col span={16}>
-                  <Form.Item label="Dirección del destinatario" validateStatus={form1.formState.errors.direccionDestinatario ? 'error' : ''} help={form1.formState.errors.direccionDestinatario?.message}>
-                    <Controller name="direccionDestinatario" control={form1.control} render={({ field }) => <Input {...field} placeholder="Final 49 Av. Sur y Bulevar Los Próceres, Smartcenter, Bodega #8, San Salvador" />} />
-                  </Form.Item>
+                  <BoxfulField
+                    name="direccionDestinatario"
+                    control={form1.control}
+                    label="Dirección del destinatario"
+                    placeholder="Final 49 Av. Sur y Bulevar Los Próceres, Smartcenter, Bodega #8, San Salvador"
+                    error={form1.formState.errors.direccionDestinatario?.message}
+                  />
                 </Col>
               </Row>
 
               <Row gutter={24}>
                 <Col span={8}>
-                  <Form.Item label="Departamento" validateStatus={form1.formState.errors.departamento ? 'error' : ''} help={form1.formState.errors.departamento?.message}>
-                    <Controller name="departamento" control={form1.control} render={({ field }) => <Input {...field} placeholder="San Salvador" />} />
-                  </Form.Item>
+                  <BoxfulField
+                    name="departamento"
+                    control={form1.control}
+                    label="Departamento"
+                    type="select"
+                    placeholder="Seleccionar"
+                    options={departments.map(d => ({ label: d.name, value: d.name }))}
+                    error={form1.formState.errors.departamento?.message}
+                  />
                 </Col>
                 <Col span={8}>
-                  <Form.Item label="Municipio" validateStatus={form1.formState.errors.municipio ? 'error' : ''} help={form1.formState.errors.municipio?.message}>
-                    <Controller name="municipio" control={form1.control} render={({ field }) => <Input {...field} placeholder="San Salvador" />} />
-                  </Form.Item>
+                  <BoxfulField
+                    name="municipio"
+                    control={form1.control}
+                    label="Municipio"
+                    type="select"
+                    placeholder="Seleccionar"
+                    options={municipalities.map(m => ({ label: m.name, value: m.name }))}
+                    error={form1.formState.errors.municipio?.message}
+                    disabled={municipalities.length === 0}
+                  />
                 </Col>
                 <Col span={8}>
-                  <Form.Item label="Punto de referencia" validateStatus={form1.formState.errors.puntoReferencia ? 'error' : ''} help={form1.formState.errors.puntoReferencia?.message}>
-                    <Controller name="puntoReferencia" control={form1.control} render={({ field }) => <Input {...field} placeholder="Cerca de redondel Arbol de la Paz" />} />
-                  </Form.Item>
+                  <BoxfulField
+                    name="puntoReferencia"
+                    control={form1.control}
+                    label="Punto de referencia"
+                    placeholder="Cerca de redondel Arbol de la Paz"
+                    error={form1.formState.errors.puntoReferencia?.message}
+                  />
                 </Col>
               </Row>
 
               <Row gutter={24}>
                 <Col span={24}>
-                  <Form.Item label="Indicaciones" validateStatus={form1.formState.errors.indicaciones ? 'error' : ''} help={form1.formState.errors.indicaciones?.message}>
-                    <Controller name="indicaciones" control={form1.control} render={({ field }) => <TextArea {...field} rows={4} placeholder="Llamar antes de entregar" />} />
-                  </Form.Item>
+                  <BoxfulField
+                    name="indicaciones"
+                    control={form1.control}
+                    label="Indicaciones"
+                    placeholder="Llamar antes de entregar"
+                    error={form1.formState.errors.indicaciones?.message}
+                  />
                 </Col>
               </Row>
 
+              {/* Sección Pago contra entrega (PCE) */}
+              <div style={{ 
+                background: '#FFF7ED', 
+                padding: '24px', 
+                borderRadius: 12, 
+                marginTop: 32,
+                border: '1px solid #FFEDD5'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                  <Text strong style={{ fontSize: 16 }}>Pago contra entrega (PCE)</Text>
+                  <Controller
+                    name="isCOD"
+                    control={form1.control}
+                    render={({ field }) => (
+                      <Switch 
+                        checked={field.value} 
+                        onChange={(checked) => {
+                          field.onChange(checked);
+                          if (!checked) form1.setValue('expectedAmount', 0);
+                        }} 
+                      />
+                    )}
+                  />
+                </div>
+                
+                <Row align="middle" gutter={12}>
+                  <Col>
+                    <Text type="secondary">Tu cliente paga el <Text strong>monto que indiques</Text> al momento de la entrega</Text>
+                  </Col>
+                  <Col>
+                    <Controller
+                      name="expectedAmount"
+                      control={form1.control}
+                      render={({ field }) => (
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                          <span style={{ marginRight: 8, color: '#6b7280' }}>$</span>
+                          <Input 
+                            {...field} 
+                            placeholder="00.00" 
+                            type="number"
+                            disabled={!form1.watch('isCOD')}
+                            style={{ 
+                              width: 120, 
+                              height: 44, 
+                              borderRadius: 8,
+                              textAlign: 'center'
+                            }} 
+                          />
+                        </div>
+                      )}
+                    />
+                  </Col>
+                </Row>
+                {form1.formState.errors.expectedAmount && (
+                  <Text type="danger" style={{ display: 'block', marginTop: 8 }}>
+                    {form1.formState.errors.expectedAmount.message}
+                  </Text>
+                )}
+              </div>
+
               <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 24 }}>
-                <Button type="primary" htmlType="submit" size="large" style={{ background: colors.backgroundPattern, borderRadius: 8, height: 48, padding: '0 40px' }}>
+                <BoxfulButton type="primary" htmlType="submit" size="large" fullWidth={false} style={{ padding: '0 40px' }}>
                   Siguiente <ArrowRightOutlined />
-                </Button>
+                </BoxfulButton>
               </div>
             </Form>
           </>

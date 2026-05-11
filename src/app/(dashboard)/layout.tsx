@@ -18,7 +18,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
   const router = useRouter();
   const dispatch = useDispatch();
-  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
   const [collapsed, setCollapsed] = useState(false);
   const [checking, setChecking] = useState(true);
 
@@ -119,7 +119,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {menuItems.find(i => i.key === pathname)?.label || 'Dashboard'}
           </Title>
           <Space>
-            <Text strong>{'{Tunombre}'}</Text>
+            <Text strong>{user ? `${user.firstName} ${user.lastName}` : 'Usuario'}</Text>
           </Space>
         </Header>
 

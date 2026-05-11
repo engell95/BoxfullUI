@@ -12,6 +12,14 @@ export const orderStep1Schema = yup.object().shape({
   municipio: yup.string().required('Campo requerido'),
   puntoReferencia: yup.string().required('Campo requerido'),
   indicaciones: yup.string(),
+  isCOD: yup.boolean().default(false),
+  expectedAmount: yup.number()
+    .transform((value) => (isNaN(value) ? undefined : value))
+    .when('isCOD', {
+      is: true,
+      then: (schema) => schema.required('El monto es requerido cuando PCE está activo').min(0.01, 'Monto inválido'),
+      otherwise: (schema) => schema.optional().nullable(),
+    }),
 });
 
 export const orderStep2Schema = yup.object().shape({

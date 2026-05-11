@@ -4,6 +4,10 @@ import React from 'react';
 import { Table, Typography, Button, Input, Space, DatePicker, Row, Col, Tag, Card } from 'antd';
 import { SearchOutlined, DownloadOutlined } from '@ant-design/icons';
 import { colors } from '@/config/theme';
+import { orderService } from '@/services/orderService';
+import { Order } from '@/models/order.model';
+import { getErrorMessage } from '@/utils/error-handler';
+import { message } from 'antd';
 
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
@@ -59,59 +63,59 @@ const columns = [
   },
 ];
 
-const data: OrderData[] = [
-  {
-    key: '1',
-    orderNo: '3446788',
-    nombre: 'Julio',
-    apellidos: 'Almendarez',
-    departamento: 'San Salvador',
-    municipio: 'San Salvador',
-    paquetes: 4,
-  },
-];
-
 export default function HistoryPage() {
+  const [orders, setOrders] = React.useState<Order[]>([]);
+  const [loading, setLoading] = React.useState(true);
   const [selectedRowKeys, setSelectedRowKeys] = React.useState<React.Key[]>([]);
+
+  React.useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  const fetchOrders = async () => {
+    setLoading(true);
+    try {
+      const data = await orderService.getOrders();
+      setOrders(data);
+    } catch (error) {
+      message.error(getErrorMessage(error));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
     setSelectedRowKeys(newSelectedRowKeys);
   };
 
-  const handleDownloadCSV = () => {
-    if (selectedRowKeys.length === 0) {
-      alert('Por favor selecciona al menos una orden');
-      return;
+  const handleDownloadCSV = async () => {
+    try {
+      const ids = selectedRowKeys.map(key => key.toString());
+      const blob = await orderService.exportOrders(ids);
+      
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ordenes_boxful_${new Date().getTime()}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      message.error('Error al exportar las órdenes');
     }
-
-    // Filtrar los datos seleccionados
-    const selectedData = data.filter(item => selectedRowKeys.includes(item.key));
-
-    // Convertir a CSV
-    const headers = ['No. de orden', 'Nombre', 'Apellidos', 'Departamento', 'Municipio', 'Paquetes'];
-    const csvContent = [
-      headers.join(','), // Cabecera
-      ...selectedData.map(item => [
-        item.orderNo,
-        item.nombre,
-        item.apellidos,
-        item.departamento,
-        item.municipio,
-        item.paquetes
-      ].join(','))
-    ].join('\n');
-
-    // Crear el archivo y descargar
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', `ordenes_boxful_${new Date().getTime()}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
   };
+
+  // Mapear órdenes del API al formato de la tabla
+  const dataSource = orders.map(order => ({
+    key: order.id || '',
+    orderNo: order.orderNo || 'N/A',
+    nombre: order.recipientFirstName,
+    apellidos: order.recipientLastName,
+    departamento: order.recipientDepartment,
+    municipio: order.recipientMunicipality,
+    paquetes: order.packages.length,
+  }));
 
   return (
     <div>
@@ -154,8 +158,9 @@ export default function HistoryPage() {
             onChange: onSelectChange,
           }}
           columns={columns} 
-          dataSource={data} 
-          pagination={false}
+          dataSource={dataSource} 
+          loading={loading}
+          pagination={{ pageSize: 10 }}
           style={{ background: '#fff' }}
           rowClassName={() => 'history-table-row'}
         />
