@@ -74,6 +74,8 @@ export default function HistoryPage() {
   const [loading, setLoading] = React.useState(true);
   const [downloading, setDownloading] = React.useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = React.useState<React.Key[]>([]);
+  const [searchText, setSearchText] = React.useState('');
+  const [dateRange, setDateRange] = React.useState<any>(null);
 
   React.useEffect(() => {
     fetchOrders();
@@ -82,9 +84,13 @@ export default function HistoryPage() {
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      const data = await orderService.getOrders();
+      const filters = {
+        search: searchText,
+        startDate: dateRange?.[0]?.toISOString(),
+        endDate: dateRange?.[1]?.toISOString(),
+      };
+      const data = await orderService.getOrders(filters);
       setOrders(data);
-      console.log(data)
     } catch (error) {
       message.error(getErrorMessage(error));
     } finally {
@@ -126,9 +132,21 @@ export default function HistoryPage() {
 
       <Card bordered={false} style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.03)', borderRadius: 12 }}>
         <Row gutter={16} style={{ marginBottom: 24 }} align="middle">
+          <Col span={6}>
+            <Input 
+              placeholder="Buscar por nombre, email o no. de orden" 
+              prefix={<SearchOutlined style={{ color: '#9ca3af' }} />}
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              onPressEnter={fetchOrders}
+              style={{ height: 40, borderRadius: 8 }}
+            />
+          </Col>
           <Col>
             <RangePicker 
-              placeholder={['Enero', 'Julio']} 
+              placeholder={['Fecha inicio', 'Fecha fin']} 
+              value={dateRange}
+              onChange={(dates) => setDateRange(dates)}
               style={{ height: 40, borderRadius: 8 }}
             />
           </Col>

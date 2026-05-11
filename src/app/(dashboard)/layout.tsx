@@ -1,12 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Layout, Menu, Typography, Space } from 'antd';
-import { PlusCircleOutlined, HistoryOutlined, UserOutlined, LogoutOutlined } from '@ant-design/icons';
+import { Layout, Menu, Typography, Space, Avatar } from 'antd';
+import { PlusCircleOutlined, HistoryOutlined, UserOutlined, LogoutOutlined, WalletOutlined } from '@ant-design/icons';
 import { usePathname, useRouter } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/store';
 import { logout } from '@/store/slices/authSlice';
+import { settlementService } from '@/services/settlementService';
 import { colors } from '@/config/theme';
 
 const { Sider, Content, Header } = Layout;
@@ -19,6 +20,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
   const [collapsed, setCollapsed] = useState(false);
   const [checking, setChecking] = useState(true);
+  const [totalToSettle, setTotalToSettle] = useState<number>(0);
 
   React.useEffect(() => {
     const checkAuth = () => {
@@ -35,6 +37,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     // Pequeño delay para permitir que Redux se hidrate
     const timer = setTimeout(checkAuth, 100);
+
+    if (isAuthenticated) {
+      settlementService.getSummary()
+        .then(res => setTotalToSettle(res.totalToSettle))
+        .catch(err => console.error('Error fetching settlement:', err));
+    }
+
     return () => clearTimeout(timer);
   }, [isAuthenticated, router]);
 
@@ -126,8 +135,25 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <Title level={4} style={{ margin: 0, fontWeight: 600 }}>
             {menuItems.find(i => i.key === pathname)?.label || 'Dashboard'}
           </Title>
-          <Space>
-            <Text strong>{user ? `${user.firstName} ${user.lastName}` : 'Usuario'}</Text>
+          <Space size={24}>
+            <div style={{ 
+              backgroundColor: '#F0FDF4', 
+              padding: '6px 16px', 
+              borderRadius: '8px', 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 10,
+              border: '1px solid #DCFCE7'
+            }}>
+              <WalletOutlined style={{ color: '#166534', fontSize: 16 }} />
+              <Text style={{ color: '#166534', fontWeight: 500 }}>
+                Monto a liquidar <span style={{ fontWeight: 800 }}>$ {totalToSettle?.toFixed(2)}</span>
+              </Text>
+            </div>
+            <Space>
+              <Avatar icon={<UserOutlined />} style={{ backgroundColor: colors.secondary }} />
+              <Text strong>{user ? `${user.firstName} ${user.lastName}` : 'Usuario'}</Text>
+            </Space>
           </Space>
         </Header>
 

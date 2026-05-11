@@ -1,13 +1,32 @@
 import api from '@/lib/axios';
 import { Order, OrderResponse } from '@/models/order.model';
 
+export interface OrderFilters {
+  status?: string;
+  startDate?: string;
+  endDate?: string;
+  search?: string;
+  page?: number;
+  limit?: number;
+}
+
 class OrderService {
   /**
-   * Obtiene la lista de órdenes del usuario
+   * Obtiene la lista de órdenes con filtros opcionales
    */
-  async getOrders(): Promise<Order[]> {
+  async getOrders(filters?: OrderFilters): Promise<Order[]> {
     try {
-      const response = await api.get('/orders');
+      const params = new URLSearchParams();
+      if (filters) {
+        if (filters.status) params.append('status', filters.status);
+        if (filters.startDate) params.append('startDate', filters.startDate);
+        if (filters.endDate) params.append('endDate', filters.endDate);
+        if (filters.search) params.append('search', filters.search);
+        if (filters.page) params.append('page', filters.page.toString());
+        if (filters.limit) params.append('limit', filters.limit.toString());
+      }
+
+      const response = await api.get(`/orders?${params.toString()}`);
       return response.data?.data;
     } catch (error) {
       console.error('Error fetching orders:', error);
