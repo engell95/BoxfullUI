@@ -1,0 +1,65 @@
+.container {
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: var(--pattern-height, 18vh);
+  background-image: url('/login/fondo.png');
+  background-size: cover;
+  background-position: center;
+}
+
+.ribbon {
+  position: absolute;
+  transform: rotate(45deg);
+  white-space: nowrap;
+  width: 400px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 800;
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  pointer-events: none;
+}
+
+.ribbonRed {
+  top: 40px;
+  right: -100px;
+  background-color: var(--color-error);
+  color: var(--color-white);
+  padding: 12px 0;
+  font-size: 1.2rem;
+  z-index: 20;
+  letter-spacing: 1px;
+}
+
+.patternContainer {
+
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: var(--pattern-height, 18vh);
+  background-color: var(--color-emerald-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.patternText {
+  font-size: 110px;
+  font-weight: 900;
+  color: var(--color-lime-bright);
+  opacity: 0.9;
+  white-space: nowrap;
+  letter-spacing: -5%;
+  font-family: 'Mona Sans', sans-serif;
+}
