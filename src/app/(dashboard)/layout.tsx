@@ -40,7 +40,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     if (isAuthenticated) {
       settlementService.getSummary()
-        .then(res => setTotalToSettle(res.totalToSettle))
+        .then(res => setTotalToSettle(res.netSettlement))
         .catch(err => console.error('Error fetching settlement:', err));
     }
 

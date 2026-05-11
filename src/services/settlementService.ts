@@ -2,10 +2,12 @@ import api from '@/lib/axios';
 
 export interface SettlementSummary {
   totalToSettle: number;
+  codOrders: number;
+  nonCodOrders: number;
   totalCollected: number;
   totalShippingCosts: number;
   totalCommissions: number;
-  ordersCount: number;
+  netSettlement: number;
 }
 
 export const settlementService = {
